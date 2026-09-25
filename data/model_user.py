@@ -19,11 +19,14 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     tg_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     avatar = sqlalchemy.Column(sqlalchemy.LargeBinary, nullable=True)
     rating = sqlalchemy.Column(sqlalchemy.Float, default=0.0)
+
+    # --- НОВОЕ ПОЛЕ ДЛЯ E2EE ---
+    public_key = sqlalchemy.Column(sqlalchemy.String, nullable=True)  # Base64 строка публичного ключа
+
     location_id = sqlalchemy.Column(sqlalchemy.Integer,
                                     sqlalchemy.ForeignKey('locations.id'), nullable=True)
     permission_id = sqlalchemy.Column(sqlalchemy.Integer,
                                       sqlalchemy.ForeignKey('permissions.id'), nullable=True)
-    open_contacts = sqlalchemy.Column(sqlalchemy.Boolean, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     def __repr__(self):
