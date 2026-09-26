@@ -1,48 +1,50 @@
 1. Users:
-id (int), name (str), about_me (str), age (int), creation_time (DateTime), email (str), phone (str), tg_name (str), open_contacts (bool), avatar (Binary), rating (float), location_id (int → Locations.id), permission_id (int → Permissions.id), hashed_password (str).
+id (int, PK), name (str), about_me (str), age (int), creation_time (DateTime), email (str, UNIQUE), phone (str), tg_name (str), avatar (Binary), rating (float), location_id (int → Locations.id), permission_id (int → Permissions.id), hashed_password (str), public_key (str) — публичный ключ X25519 в формате Base64 для E2EE шифрования.
 2. Locations:
-id (int), address (str), latitude (float), longitude (float).
+id (int, PK), address (str), latitude (float), longitude (float).
 3. Permissions:
-id (int), name_permission (str).
+id (int, PK), name_permission (str, UNIQUE).
 4. Ban:
-id (int), user_id (int → Users.id), banned (bool), reason (str), started_at (DateTime), until (DateTime).
+id (int, PK), user_id (int → Users.id), banned (bool), reason (str), started_at (DateTime), until (DateTime).
 5. Complaint:
-id (int), from_user_id (int → Users.id), to_user_id (int → Users.id), table_id (int → GameTables.id), text (text), complaint_category_id (int → ComplaintsCategory.id).
+id (int, PK), from_user_id (int → Users.id), to_user_id (int → Users.id), table_id (int → GameTables.id), text (text), complaint_category_id (int → ComplaintsCategory.id).
 6. ComplaintsCategory:
-id (int), name_complaint (str).
+id (int, PK), name_complaint (str, UNIQUE).
 7. Genre:
-id (int), name (str).
+id (int, PK), name (str, UNIQUE).
 8. BoardGames:
-id (int), name (str), picture (Binary), min_number_players (int), max_number_players (int), min_duration (int - минуты), max_duration (int - минуты), age (int), rules (str), description (str).
-9. GameGenre:
-id (int), board_game_id (int → BoardGames.id), genre_id (int → Genre.id).
+id (int, PK), name (str), picture (Binary), min_duration (int, минуты), max_duration (int, минуты), min_number_players (int), max_number_players (int), age (int, возрастное ограничение), rules (str), description (str).
+9. GameGenre: (Таблица-связка: одна игра может иметь несколько жанров)
+id (int, PK), board_game_id (int → BoardGames.id), genre_id (int → Genre.id).
 UNIQUE(board_game_id, genre_id).
 10. MarkBoardGames:
-id (int), board_game_id (int → BoardGames.id), creator_id (int → Users.id), description (str), rating (int - 1..5).
-11. GameTables:
-id (int), name (str), creator_id (int → Users.id), creation_time (DateTime), location_id (int → Locations.id), description (str), min_age (int), max_age (int).
+id (int, PK), board_game_id (int → BoardGames.id), creator_id (int → Users.id), description (str), rating (int, 1..5).
+11. GameTables: (Аналог "группы" или "комнаты" в мессенджере)
+id (int, PK), name (str), creator_id (int → Users.id), creation_time (DateTime), location_id (int → Locations.id), description (str), min_age (int), max_age (int).
 12. GamesPlayed:
-id (int), table_id (int → GameTables.id), board_game_id (int → BoardGames.id), duration (int - минуты), winner_id (int → Users.id), description (str).
-13. Message:
-id (int), creator_id (int → Users.id), table_id (int → GameTables.id), creation_time (DateTime), text (str), picture_pin (Binary), status_id (int → MessageStatus.id).
+id (int, PK), table_id (int → GameTables.id), board_game_id (int → BoardGames.id), duration (int, минуты), winner_id (int → Users.id), description (str).
+13. Message: (Адаптировано под E2EE: сервер не видит содержимого)
+id (int, PK), creator_id (int → Users.id), table_id (int → GameTables.id), creation_time (DateTime), encrypted_payload (str, NOT NULL) — зашифрованный текст сообщения (Base64), encrypted_picture (Binary, NULL) — зашифрованное изображение (опционально), status_id (int → MessageStatus.id).
 14. MessageStatus:
-id (int), name (str - "sent"/"delivered"/"read").
+id (int, PK), name (str, UNIQUE) — значения: "sent", "delivered", "read".
 15. FriendRequest:
-id (int), from_user_id (int → Users.id), to_user_id (int → Users.id), status (str - "pending"/"accepted"/"rejected"), created_at (DateTime).
-16. UserFavoriteGame:
-id (int), user_id (int → Users.id), board_game_id (int → BoardGames.id).
+id (int, PK), from_user_id (int → Users.id), to_user_id (int → Users.id), status (str) — значения: "pending", "accepted", "rejected", created_at (DateTime).
+16. UserFavoriteGame: (Таблица-связка)
+id (int, PK), user_id (int → Users.id), board_game_id (int → BoardGames.id).
 UNIQUE(user_id, board_game_id).
-17. UserDislikedGame:
-id (int), user_id (int → Users.id), board_game_id (int → BoardGames.id).
+17. UserDislikedGame: (Таблица-связка)
+id (int, PK), user_id (int → Users.id), board_game_id (int → BoardGames.id).
 UNIQUE(user_id, board_game_id).
-18. TableGame:
-id (int), table_id (int → GameTables.id), board_game_id (int → BoardGames.id).
-19. TablePlayer:
-id (int), table_id (int → GameTables.id), user_id (int → Users.id), joined_at (DateTime), role (str - "host"/"player").
-20. GamePlayedUser:
-id (int), game_played_id (int → GamesPlayed.id), user_id (int → Users.id).
+18. TableGame: (Таблица-связка: во что планируют играть за этим столом)
+id (int, PK), table_id (int → GameTables.id), board_game_id (int → BoardGames.id).
+19. TablePlayer: (Таблица-связка: участники стола, аналог group_members)
+id (int, PK), table_id (int → GameTables.id), user_id (int → Users.id), joined_at (DateTime), role (str) — значения: "host", "player".
+20. GamePlayedUser: (Таблица-связка: кто реально участвовал в сыгранной партии)
+id (int, PK), game_played_id (int → GamesPlayed.id), user_id (int → Users.id).
 21. UserPreferences:
-id (int), user_id (int → Users.id), preferred_min_duration (int - минуты), preferred_max_duration (int - минуты), preferred_min_players (int), preferred_max_players (int).
-22. UserPreferredGenre:
-id (int), user_preference_id (int → UserPreferences.id), genre_id (int → Genre.id).
+id (int, PK), user_id (int → Users.id, UNIQUE), preferred_min_duration (int), preferred_max_duration (int), preferred_min_players (int), preferred_max_players (int).
+22. UserPreferredGenre: (Таблица-связка: предпочтительные жанры пользователя)
+id (int, PK), user_preference_id (int → UserPreferences.id), genre_id (int → Genre.id).
 UNIQUE(user_preference_id, genre_id).
+23. KeyExchange: (НОВАЯ: Почтовый ящик для асинхронного обмена Sender Keys)
+id (int, PK), recipient_id (int → Users.id), sender_id (int → Users.id), ephemeral_public_key (str, NOT NULL) — эфемерный публичный ключ (Base64), encrypted_sender_key (str, NOT NULL) — личный Sender Key отправителя, зашифрованный общим секретом (Base64), is_consumed (bool, DEFAULT FALSE) — флаг, забрал ли получатель ключ, created_at (DateTime).
