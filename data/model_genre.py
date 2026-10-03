@@ -1,13 +1,8 @@
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class Genre(SqlAlchemyBase, SerializerMixin):
+class Genre(Base, SerializerMixin):
     __tablename__ = 'genres'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)
-
-    def __repr__(self):
-        return f'<Genre> {self.id} {self.name}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    name = sa.Column(sa.String, nullable=False, unique=True)

@@ -1,19 +1,13 @@
-import sqlalchemy
+import sqlalchemy as sa
 import datetime
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class Ban(SqlAlchemyBase, SerializerMixin):
+class Ban(Base, SerializerMixin):
     __tablename__ = 'bans'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    user_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                sqlalchemy.ForeignKey('users.id'), nullable=True)
-    banned = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
-    reason = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
-    started_at = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
-    until = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
-
-    def __repr__(self):
-        return f'<Ban> {self.id} user={self.user_id} banned={self.banned}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'), nullable=True)
+    banned = sa.Column(sa.Boolean, default=False)
+    reason = sa.Column(sa.Text, nullable=True)
+    started_at = sa.Column(sa.DateTime, default=datetime.datetime.now)
+    until = sa.Column(sa.DateTime, nullable=True)

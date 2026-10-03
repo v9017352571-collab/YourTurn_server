@@ -1,20 +1,12 @@
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class GamesPlayed(SqlAlchemyBase, SerializerMixin):
+class GamesPlayed(Base, SerializerMixin):
     __tablename__ = 'games_played'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    table_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                 sqlalchemy.ForeignKey('game_tables.id'), nullable=True)
-    board_game_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                      sqlalchemy.ForeignKey('board_games.id'), nullable=True)
-    duration = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)  # минуты
-    winner_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                  sqlalchemy.ForeignKey('users.id'), nullable=True)
-    description = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
-
-    def __repr__(self):
-        return f'<GamesPlayed> {self.id} table={self.table_id}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    table_id = sa.Column(sa.Integer, sa.ForeignKey('game_tables.id'), nullable=True)
+    board_game_id = sa.Column(sa.Integer, sa.ForeignKey('board_games.id'), nullable=True)
+    duration = sa.Column(sa.Integer, nullable=True)
+    winner_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'), nullable=True)
+    description = sa.Column(sa.Text, nullable=True)

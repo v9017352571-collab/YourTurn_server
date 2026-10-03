@@ -1,18 +1,12 @@
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class UserPreference(SqlAlchemyBase, SerializerMixin):
+class UserPreference(Base, SerializerMixin):
     __tablename__ = 'user_preferences'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    user_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                sqlalchemy.ForeignKey('users.id'), nullable=False, unique=True)
-    preferred_min_duration = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)  # минуты
-    preferred_max_duration = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)  # минуты
-    preferred_min_players = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    preferred_max_players = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-
-    def __repr__(self):
-        return f'<UserPreference> {self.id} user={self.user_id}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'), nullable=False, unique=True)
+    preferred_min_duration = sa.Column(sa.Integer, nullable=True)
+    preferred_max_duration = sa.Column(sa.Integer, nullable=True)
+    preferred_min_players = sa.Column(sa.Integer, nullable=True)
+    preferred_max_players = sa.Column(sa.Integer, nullable=True)

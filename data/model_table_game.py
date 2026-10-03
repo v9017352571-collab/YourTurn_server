@@ -1,16 +1,9 @@
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class TableGame(SqlAlchemyBase, SerializerMixin):
+class TableGame(Base, SerializerMixin):
     __tablename__ = 'table_games'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    table_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                 sqlalchemy.ForeignKey('game_tables.id'), nullable=False)
-    board_game_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                      sqlalchemy.ForeignKey('board_games.id'), nullable=False)
-
-    def __repr__(self):
-        return f'<TableGame> table={self.table_id} game={self.board_game_id}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    table_id = sa.Column(sa.Integer, sa.ForeignKey('game_tables.id'), nullable=False)
+    board_game_id = sa.Column(sa.Integer, sa.ForeignKey('board_games.id'), nullable=False)

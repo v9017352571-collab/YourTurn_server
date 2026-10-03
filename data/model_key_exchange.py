@@ -1,29 +1,14 @@
-import sqlalchemy
+import sqlalchemy as sa
 import datetime
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class KeyExchange(SqlAlchemyBase, SerializerMixin):
+class KeyExchange(Base, SerializerMixin):
     __tablename__ = 'key_exchanges'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-
-    recipient_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                     sqlalchemy.ForeignKey('users.id'), nullable=False)
-    sender_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                  sqlalchemy.ForeignKey('users.id'), nullable=False)
-
-    # Эфемерный публичный ключ отправителя (Base64)
-    ephemeral_public_key = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-
-    # Личный Sender Key отправителя, зашифрованный общим секретом (Base64)
-    encrypted_sender_key = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-
-    # Флаг: забрал ли уже получатель этот ключ (чтобы очистить мусор)
-    is_consumed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
-
-    created_at = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
-
-    def __repr__(self):
-        return f'<KeyExchange> {self.id} from={self.sender_id} to={self.recipient_id} consumed={self.is_consumed}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    recipient_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'), nullable=False)
+    sender_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'), nullable=False)
+    ephemeral_public_key = sa.Column(sa.String, nullable=False)
+    encrypted_sender_key = sa.Column(sa.String, nullable=False)
+    is_consumed = sa.Column(sa.Boolean, default=False)
+    created_at = sa.Column(sa.DateTime, default=datetime.datetime.now)

@@ -1,25 +1,22 @@
 import sqlalchemy as sa
-import sqlalchemy.orm as orm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase
 
-SqlAlchemyBase = orm.declarative_base()
-__factory = None
+# 1. Используем асинхронный драйвер aiosqlite
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./db/test_database.sqlite"
 
+# 2. Создаем асинхронный движок
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 
-def global_init(db_file):
-    global __factory
-    if __factory:
-        return
-    if not db_file or not db_file.strip():
-        raise Exception("Необходимо указать файл базы данных.")
-    conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
-    print(f"Подключение к базе данных по адресу {conn_str}")
-    engine = sa.create_engine(conn_str, echo=False)
-    __factory = orm.sessionmaker(bind=engine)
-    from . import __all_models
-    SqlAlchemyBase.metadata.create_all(engine)
+# 3. Создаем фабрику асинхронных сессий
+async_session = async_sessionmaker(engine, expire_on_commit=False)
 
+# 4. Базовый класс для всех моделей (обязательно с AsyncAttrs)
+class Base(AsyncAttrs, DeclarativeBase):
+    pass
 
-def create_session() -> Session:
-    global __factory
-    return __factory()
+# 5. Асинхронная функция для создания таблиц (вызывается при старте сервера)
+async def init_db():
+    async with engine.begin() as conn:
+        from data import __all_models
+        await conn.run_sync(Base.metadata.create_all)

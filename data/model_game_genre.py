@@ -1,20 +1,10 @@
-import sqlalchemy
+import sqlalchemy as sa
 from sqlalchemy_serializer import SerializerMixin
-from data.db_session import SqlAlchemyBase
+from data.db_session import Base
 
-
-class GameGenre(SqlAlchemyBase, SerializerMixin):
+class GameGenre(Base, SerializerMixin):
     __tablename__ = 'game_genres'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    board_game_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                      sqlalchemy.ForeignKey('board_games.id'), nullable=False)
-    genre_id = sqlalchemy.Column(sqlalchemy.Integer,
-                                 sqlalchemy.ForeignKey('genres.id'), nullable=False)
-
-    __table_args__ = (
-        sqlalchemy.UniqueConstraint('board_game_id', 'genre_id', name='uq_game_genre'),
-    )
-
-    def __repr__(self):
-        return f'<GameGenre> game={self.board_game_id} genre={self.genre_id}'
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    board_game_id = sa.Column(sa.Integer, sa.ForeignKey('board_games.id'), nullable=False)
+    genre_id = sa.Column(sa.Integer, sa.ForeignKey('genres.id'), nullable=False)
+    __table_args__ = (sa.UniqueConstraint('board_game_id', 'genre_id', name='uq_game_genre'),)

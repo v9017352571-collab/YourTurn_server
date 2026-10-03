@@ -1,36 +1,34 @@
-# init_db.py
+import asyncio
 import os
-import sqlite3
-from data.db_session import global_init
+from data.db_session import init_db, engine
 
 
-def main():
-    db_file = 'db/test_database.sqlite'
+async def main():
+    db_path = "db/test_database.sqlite"
 
-    # Удаляем старую тестовую базу, если она есть, для чистоты эксперимента
-    if os.path.exists(db_file):
-        os.remove(db_file)
-        print(f"Старый файл {db_file} удалён.")
+    # Удаляем старую БД для чистоты теста
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        print(f"Старый файл {db_path} удалён.")
 
-    print("Инициализация базы данных...")
-    # Эта функция создаст все таблицы из __all_models.py
-    global_init(db_file)
-    print("База данных успешно создана!\n")
+    # Создаем папку db, если её нет
+    os.makedirs("db", exist_ok=True)
 
-    # Проверяем, что именно создалось
-    conn = sqlite3.connect(db_file)
+    print("Инициализация асинхронной базы данных...")
+    await init_db()
+    print("✅ База данных успешно создана!")
+
+    # Проверка количества таблиц
+    import sqlite3
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;")
     tables = cursor.fetchall()
-
-    print(f"Всего создано таблиц: {len(tables)}")
-    print("Список таблиц:")
+    print(f"\nВсего создано пользовательских таблиц: {len(tables)}")
     for i, table in enumerate(tables, 1):
         print(f"  {i:2d}. {table[0]}")
-
     conn.close()
-    print("\nПроверка завершена. Файл test_database.sqlite готов к просмотру.")
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
